@@ -2,9 +2,10 @@
 import pylab as plt
 import numpy as np
 import time
+import particle
 
 
-def sim_particle_motions(particles,boundary,memory,dt,framerate=30,timeit=True,display_rate=10):
+def sim_particle_motions(particles,boundary,memory,dt,timeit=True,display_rate=10):
 
   fig = plt.figure(figsize=(9,7))
   fig.set_facecolor('black')
@@ -17,7 +18,15 @@ def sim_particle_motions(particles,boundary,memory,dt,framerate=30,timeit=True,d
     ax.axvline(-boundary,color='white')
     ax.axvline(boundary,color='white')
   ax.axis('off')
-  #ax.set_facecolor('black')
+  ax.xaxis.label.set_color('white')        #setting up X-axis label color to yellow
+  ax.yaxis.label.set_color('white')          #setting up Y-axis label color to blue
+
+  ax.tick_params(axis='x', colors='white')    #setting up X-axis tick color to red
+  ax.tick_params(axis='y', colors='white')  #setting up Y-axis tick color to black
+
+  ax.spines['left'].set_color('white')        # setting up Y-axis tick color to red
+  ax.spines['top'].set_color('white')         #setting up above X-axis tick color to red
+  ax.set_facecolor('black')
   plt.ion()
 
   nparts = len(particles)
@@ -39,12 +48,14 @@ def sim_particle_motions(particles,boundary,memory,dt,framerate=30,timeit=True,d
       legend.append([points[i],f'{part.name} ({np.linalg.norm(part.vvec):<.1f} SPEED)'])
 
   leg = ax.legend([i[0] for i in legend],[i[1] for i in legend])
+  background = fig.canvas.copy_from_bbox(ax.bbox)
 
   cnt = -1
   while True:
     #ax.clear()
-    legend.clear()
+    #fig.canvas.restore_region(background)
     leg.remove()
+    legend.clear()
     cnt+=1
     tot_sim_start = time.time()
     for j,part in enumerate(particles):
@@ -63,7 +74,7 @@ def sim_particle_motions(particles,boundary,memory,dt,framerate=30,timeit=True,d
         r = part.get_r(other_part.rvec) #Seperation between two 
         rhat = part.get_rhat(other_part.rvec) #Direction of seperation
         m,q,s = other_part.m,other_part.q,other_part.s #mass, charge, spin
-        a = part.a_g(m,r) #acceleration due to gravity
+        a = part.a_g(m,r,G=particle.GN) #acceleration due to gravity
         a+=part.a_C(r,q) #acceleration due to em
         a+=part.a_s(r,s) #acceleration due to spring
         avec_next += a*rhat #Get vector acceleration
@@ -104,14 +115,14 @@ def sim_particle_motions(particles,boundary,memory,dt,framerate=30,timeit=True,d
       points[i] = plt.scatter(part.rvec[0],part.rvec[1],color=color,label=part.name,marker=marker)
       graphs[i] = plt.plot(rvecs[i,:,0],rvecs[i,:,1],color=color,label=part.name,alpha=0.5)[0]
       if part.name is not None:
-        legend.append([points[i],f'{part.name} ({np.linalg.norm(part.vvec):<.1f} SPEED)'])
+        legend.append([points[i],f'{part.name} ({np.linalg.norm(part.vvec)/1e3:<.2f} km/s)'])
       #print(f'{part.name} ({np.linalg.norm(part.vvec):<.1f} SPEED)')
     #print([i[1] for i in legend])
     make_graphs_end = time.time()
-    plt.title(f't = {dt*cnt:<.3f}',color='white')
+    plt.title(f't = {dt*cnt/86400:<.2f} days',color='white')
     leg = ax.legend([i[0] for i in legend],[i[1] for i in legend]) #Get items from columns of legend list
     plt.draw()
-    plt.pause(1/framerate)
+    plt.pause(1/6e5)
     tot_plot_end = time.time()
     if timeit and cnt%display_rate == 0:
       print(f'Sim time (s): {tot_sim_end-tot_sim_start:<.3f}')

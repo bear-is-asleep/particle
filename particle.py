@@ -1,7 +1,7 @@
 import numpy as np
 
 G = 0.1 #Gravitational constant
-
+GN = 6.6743e-11 # Newtons's Gm3 kg-1 s-2
 class Particle:
 
   k = 10 #EM Coupling constant - all have the same constant
@@ -35,7 +35,7 @@ class Particle:
     r = self.get_r(rvec)
     return (self.rvec-rvec)/r #rvec/rmag = rhat
 
-  def a_g(self,m,r): #Graviational acceleration
+  def a_g(self,m,r,G=G): #Graviational acceleration
     return -G*m/r**2
   def a_s(self,r,s): #Spring acceleration
     if self.m == 0:
