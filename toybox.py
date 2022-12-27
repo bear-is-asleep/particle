@@ -6,38 +6,69 @@ planet_info = pd.read_csv('planets.txt', sep='\t', index_col=0)
 mass_sun = 1.9891e30 #kg
 inds = [str(ind).strip() for ind in planet_info.loc['OrbitalInclination(degrees)'].index]
 planet_info.columns = inds
-#print(planet_info.loc['OrbitalInclination(degrees)'].index)
-print(planet_info.index)
 
+def make_moon(planet_name,moon_name,color,theta_planet=None,theta_moon=None,v_planet=None,
+  v_moon=None,perihelion_planet=None,perihilion_moon=None,m=None):
+  if theta_planet is None:
+    theta_planet = float(planet_info.loc['OrbitalInclination(degrees)',planet_name])*np.pi/180
+  if theta_moon is None:
+    theta_moon = float(planet_info.loc['OrbitalInclination(degrees)',moon_name])*np.pi/180
+  if v_planet is None:
+    v_planet = float(planet_info.loc['OrbitalVelocity(km/s)',planet_name])*1e3
+  if v_moon is None:
+    v_moon = float(planet_info.loc['OrbitalVelocity(km/s)',moon_name])*1e3
+  if perihelion_planet is None:
+    perihelion_planet = planet_info.loc['Perihelion(10^6km)',planet_name]*1e9
+  if perihilion_moon is None:
+    perihilion_moon = planet_info.loc['Perihelion(10^6km)',moon_name]*1e9
+  if m is None:
+    m = planet_info.loc['Mass(10^24kg)',moon_name]*1e24
+
+  vy_init = v_planet*np.cos(theta_planet)+v_moon*np.cos(theta_moon)
+  vz_init = v_planet*np.sin(theta_planet)+v_moon*np.sin(theta_moon)
+  return particle.Particle(q=0,
+    m=m,
+    s=0,
+    rvec=np.array([perihelion_planet+perihilion_moon,0,0]),
+    vvec=np.array([0,vy_init,vz_init]),
+    name=moon_name,
+    color=color)
+
+def make_planet(name,color,theta=None,v=None,perihelion=None,m=None):
+  if theta is None:
+    theta = float(planet_info.loc['OrbitalInclination(degrees)',name])*np.pi/180
+  if v is None:
+    v = float(planet_info.loc['OrbitalVelocity(km/s)',name])*1e3
+  if perihelion is None:
+    perihelion = planet_info.loc['Perihelion(10^6km)',name]*1e9
+  if m is None:
+    m = planet_info.loc['Mass(10^24kg)',name]*1e24
+
+  vy_init = v*np.cos(theta)
+  vz_init = v*np.sin(theta)
+  return particle.Particle(q=0,
+    m=m,
+    s=0,
+    rvec=np.array([perihelion,0,0]),
+    vvec=np.array([0,vy_init,vz_init]),
+    name=name,
+    color=color)
 
 sun = particle.Particle(q=0,
   m=mass_sun,
   s=0,
   name='Sun',
   color='yellow')
-theta_earth = planet_info.loc['OrbitalInclination(degrees)','EARTH']*np.pi/180
-vy_init = planet_info.loc['OrbitalVelocity(km/s)','EARTH']*1e3*np.cos(theta_earth)
-vz_init = planet_info.loc['OrbitalVelocity(km/s)','EARTH']*1e3*np.sin(theta_earth)
-earth = particle.Particle(q=0,
-  m=planet_info.loc['Mass(10^24kg)','EARTH']*1e24,
-  s=0,
-  rvec=np.array([planet_info.loc['Perihelion(10^6km)','EARTH']*1e9,0,0]),
-  vvec=np.array([0,vy_init,vz_init]),
-  name='Earth',
-  color='blue')
-p3 = particle.Particle(q=0,
-  m=1e-3,
-  s=0,
-  rvec=np.array([5.1,5.,0]),
-  vvec=np.array([-10.,10.,0]), 
-  name='Moon',
-  color='gray')
-p4 = particle.Particle(q=0,
-  m=1e4,
-  s=0,
-  rvec=np.array([30.1,0,0]),
-  vvec=np.array([-5,10.,0]), 
-  name='Jupiter',
-  color='red')
+earth = make_planet('EARTH','blue')
+moon = make_moon('EARTH','MOON','grey')
+mars = make_planet('MARS','red')
+pluto = make_planet('PLUTO','cyan')
+mercury = make_planet('MERCURY','brown')
+venus = make_planet('VENUS','pink')
+saturn = make_planet('SATURN','green')
+jupiter = make_planet('JUPITER','orange')
+uranus = make_planet('URANUS','aqua')
+neptune = make_planet('NEPTUNE','purple')
 #particles = [p1,p2,p3,p4]
-solar_system = [sun,earth]
+close_planets = [sun,mercury,venus,earth,moon,mars]
+solar_system = [sun,mercury,venus,earth,mars,saturn,jupiter,uranus,pluto]

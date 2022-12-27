@@ -5,7 +5,8 @@ import time
 import particle
 
 
-def sim_particle_motions(particles,boundary,memory,dt,timeit=True,display_rate=10):
+def sim_particle_motions(particles,boundary,memory,dt,timeit=False,display_rate=10,
+  xlim=None,ylim=None):
 
   fig = plt.figure(figsize=(9,7))
   fig.set_facecolor('black')
@@ -17,6 +18,10 @@ def sim_particle_motions(particles,boundary,memory,dt,timeit=True,display_rate=1
     ax.axhline(boundary,color='white')
     ax.axvline(-boundary,color='white')
     ax.axvline(boundary,color='white')
+  if xlim is not None:
+    ax.set_xlim([-xlim,xlim])
+  if ylim is not None:
+    ax.set_ylim([-ylim,ylim])
   ax.axis('off')
   ax.xaxis.label.set_color('white')        #setting up X-axis label color to yellow
   ax.yaxis.label.set_color('white')          #setting up Y-axis label color to blue
@@ -56,6 +61,7 @@ def sim_particle_motions(particles,boundary,memory,dt,timeit=True,display_rate=1
     #fig.canvas.restore_region(background)
     leg.remove()
     legend.clear()
+    update = False
     cnt+=1
     tot_sim_start = time.time()
     for j,part in enumerate(particles):
@@ -92,37 +98,45 @@ def sim_particle_motions(particles,boundary,memory,dt,timeit=True,display_rate=1
             vvecs[j,-1][k] = -vvecs[j,-1][k]
     tot_sim_end = time.time()
     tot_plot_start = time.time()
-    for i,part in enumerate(particles):
+    #if cnt*dt/86400%1 == 0:
+    if 10*cnt*dt%1 == 0:
+      update = True
+    #update=True
+    if update:
+      for i,part in enumerate(particles):
 
-      if part.color is None:
-        if part.q < 0:
-          color = 'blue'
-        elif part.q > 0:
-          color = 'red'
-        elif part.q == 0:
-          color = 'yellow'
-      else:
-        color = part.color
-      if part.s > 0:
-        marker = 'x'
-      else:
-        marker = 'o'
-      part.rvec = rvecs[i,-1]
-      part.vvec = vvecs[i,-1]
-      part.avec = avecs[i,-1]
-      points[i].remove()
-      graphs[i].remove()
-      points[i] = plt.scatter(part.rvec[0],part.rvec[1],color=color,label=part.name,marker=marker)
-      graphs[i] = plt.plot(rvecs[i,:,0],rvecs[i,:,1],color=color,label=part.name,alpha=0.5)[0]
-      if part.name is not None:
-        legend.append([points[i],f'{part.name} ({np.linalg.norm(part.vvec)/1e3:<.2f} km/s)'])
-      #print(f'{part.name} ({np.linalg.norm(part.vvec):<.1f} SPEED)')
-    #print([i[1] for i in legend])
-    make_graphs_end = time.time()
-    plt.title(f't = {dt*cnt/86400:<.2f} days',color='white')
-    leg = ax.legend([i[0] for i in legend],[i[1] for i in legend]) #Get items from columns of legend list
-    plt.draw()
-    plt.pause(1/6e5)
+        if part.color is None:
+          if part.q < 0:
+            color = 'blue'
+          elif part.q > 0:
+            color = 'red'
+          elif part.q == 0:
+            color = 'yellow'
+        else:
+          color = part.color
+        if part.s > 0:
+          marker = 'x'
+        else:
+          marker = 'o'
+        part.rvec = rvecs[i,-1]
+        part.vvec = vvecs[i,-1]
+        part.avec = avecs[i,-1]
+        points[i].remove()
+        graphs[i].remove()
+        points[i] = plt.scatter(part.rvec[0],part.rvec[1],color=color,label=part.name,marker=marker)
+        graphs[i] = plt.plot(rvecs[i,:,0],rvecs[i,:,1],color=color,label=part.name,alpha=0.5)[0]
+        if part.name is not None:
+          legend.append([points[i],f'{part.name} (v = {np.linalg.norm(part.vvec)/1e3:<.2f} km/s d = {np.linalg.norm(part.rvec)/1.496e+11:<.2f} AU)'])
+        #print(f'{part.name} ({np.linalg.norm(part.vvec):<.1f} SPEED)')
+      #print([i[1] for i in legend])
+      make_graphs_end = time.time()
+      #plt.title(f't = {dt*cnt/86400:<.2f} days',color='white')
+      plt.title(f't = {dt*cnt:<.2f}',color='white')
+      leg = ax.legend([i[0] for i in legend],[i[1] for i in legend]) #Get items from columns of legend list
+      leg.get_frame().set_alpha(0.3)
+      #leg.get_frame().set_facecolor((0, 0, 1, 0.1))
+      plt.draw()
+      plt.pause(1/6e5)
     tot_plot_end = time.time()
     if timeit and cnt%display_rate == 0:
       print(f'Sim time (s): {tot_sim_end-tot_sim_start:<.3f}')
