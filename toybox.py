@@ -72,3 +72,61 @@ neptune = make_planet('NEPTUNE','purple')
 #particles = [p1,p2,p3,p4]
 close_planets = [sun,mercury,venus,earth,moon,mars]
 solar_system = [sun,mercury,venus,earth,mars,saturn,jupiter,uranus,pluto]
+
+spring1 = particle.Particle(q=0,
+  m=1e9,
+  s=1,
+  name='Big spring 1',
+  rvec=[0,-1,0],
+  size=100,
+  color='orange',
+  moveable=False)
+spring2 = particle.Particle(q=0,
+  m=1e9,
+  s=1,
+  name='Big spring 2',
+  rvec=[0,1,0],
+  size=100,
+  color='orange',
+  moveable=False)
+
+big_charge = 5
+positive1 = particle.Particle(s=0,
+  m=1e9,
+  q=big_charge,
+  name='Big positive 1',
+  rvec=[0,1,0],
+  size=100,
+  color='red',
+  moveable=False)
+negative1 = particle.Particle(s=0,
+  m=1e9,
+  q=-big_charge,
+  name='Big negative 1',
+  rvec=[0,-1,0],
+  size=100,
+  color='blue',
+  moveable=False)
+
+def make_up(quark_rmax = 1):
+  up = particle.Particle(s=1/2,
+    m=1,
+    q=2/3,
+    name='Up',
+    rvec=np.random.uniform(-1*quark_rmax,quark_rmax,3),
+    color='pink',
+    marker='o'
+    )
+  return up
+
+def make_down(quark_rmax = 1):
+  down = particle.Particle(s=1/2,
+    m=1,
+    q=-1/3,
+    name='Down',
+    rvec=np.random.uniform(-1*quark_rmax,quark_rmax,3),
+    color='cyan',
+    marker='o'
+    )
+  return down
+

@@ -5,9 +5,10 @@ GN = 6.6743e-11 # Newtons's Gm3 kg-1 s-2
 class Particle:
 
   k = 10 #EM Coupling constant - all have the same constant
+  ks = 500 #Spring coupling constant - I'm pretending this works
 
-  def __init__(self,q=0,m=1,s=0,a0=1e-1,name=None,rvec=np.zeros(3),vvec=np.zeros(3),avec=np.zeros(3),color=None,
-    g=0): #
+  def __init__(self,q=0,m=1,s=0,a0=1e-2,name=None,rvec=np.zeros(3),vvec=np.zeros(3),avec=np.zeros(3),color=None,
+    g=0,size=None,marker=None,moveable=True): #
     self.rvec = rvec #location
     self.vvec = vvec #velocity
     self.avec = avec #acceleration
@@ -18,6 +19,9 @@ class Particle:
     self.a0 = a0 #minimum distance (Bound state formation)?
     self.color = color #Set color for particle point
     self.g = g #Set downward acceleration
+    self.size = size #Size of particle
+    self.marker = marker #Marker style
+    self.moveable = moveable #Is it moveable?
 
   def get_r(self,rvec): #Distance between particle and other point
     tot = 0
@@ -38,17 +42,19 @@ class Particle:
     return (self.rvec-rvec)/r #rvec/rmag = rhat
 
   def a_g(self,m,r,G=G): #Graviational acceleration
-    return -G*m/r**2
+    if self.moveable:
+      return -G*m/r**2
+    else: return 0
   def a_s(self,r,s): #Spring acceleration
-    if self.m == 0:
+    if self.m == 0 or not self.moveable:
       return 0
-    return -np.sqrt(self.s*s)*r**2/(2*self.m)
+    return -self.ks*np.sqrt(self.s*s)*r**2/(2*self.m)
   def a_C(self,r,q): #Coloumb acceleration
-    if self.m == 0:
+    if self.m == 0 or not self.moveable:
       return 0
     return self.k*self.q*q/(self.m*r**2) #Coloumb acceleration
   def a_fall(self): #Downward graviation
-    if self.m == 0:
+    if self.m == 0 or not self.moveable:
       return 0
     return self.g
 
@@ -70,13 +76,14 @@ class SpringParticle(Particle): #Make spring particle to simulate spring force
 
 
 def make_particles(n,m=50,rmax=10,vmax=0,amax=0,rtype='uniform',dim=2,charge=1,
-  s=0,g=0): 
+  s=0,g=0,name=None,a0=1e-1): 
   """
   Make n random particles and turn them into a list
   """
   particles = []
-  for _ in range(n):
-    q = np.random.choice([-charge,charge])
+  for i in range(n):
+    #q = np.random.choice([-charge,charge])
+    q = charge
     if rtype == 'uniform':
       #Acceleration, velocity, acceleration initialize
       rvec = np.random.uniform(-1*rmax,rmax,3)
@@ -97,7 +104,11 @@ def make_particles(n,m=50,rmax=10,vmax=0,amax=0,rtype='uniform',dim=2,charge=1,
     #   part = Particle(q=q,m=m,s=s,rvec=rvec,vvec=vvec,avec=avec)
     # elif isinstance(part_type,SpringParticle):
     #   part = SpringParticle(q=q,m=m,s=s,rvec=rvec,vvec=vvec,avec=avec)
-    part = Particle(q=q,m=m,s=s,rvec=rvec,vvec=vvec,avec=avec,g=g)
+    if name is not None:
+      part_name = f'{name} {i}'
+    else:
+      part_name = None
+    part = Particle(q=q,m=m,s=s,rvec=rvec,vvec=vvec,avec=avec,g=g,name=part_name,a0=a0)
     particles.append(part)
   return particles
 

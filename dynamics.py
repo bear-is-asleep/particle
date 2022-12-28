@@ -11,7 +11,7 @@ import helpers
 
 def sim_particle_motions(particles,boundary,memory,dt,timeit=False,display_rate=10,
   xlim=None,ylim=None,save=False,dir='Gifs',fname='sim',frames=100,update_rate=1,
-  closest_N=1e9):
+  closest_N=1e9,set_legend=False):
   """
   Sim particle motions with option to save as gif
   frames: amount of pngs to make before saving, then deleting pngs
@@ -117,7 +117,8 @@ def sim_particle_motions(particles,boundary,memory,dt,timeit=False,display_rate=
         rhat = part.get_rhat(other_part.rvec) #Direction of seperation
         m,q,s = other_part.m,other_part.q,other_part.s #mass, charge, spin
         if calc_inverse:
-          a+= part.a_g(m,r,G=particle.GN) #acceleration due to gravity
+          #a+= part.a_g(m,r,G=particle.GN) #acceleration due to gravity
+          a+=part.a_g(m,r)
           if q != 0:
             a+=part.a_C(r,q) #acceleration due to em
         if calc_polynomial and s!=0:
@@ -153,26 +154,37 @@ def sim_particle_motions(particles,boundary,memory,dt,timeit=False,display_rate=
             color = 'yellow'
         else:
           color = part.color
-        if part.s > 0:
-          marker = 'x'
+        if part.marker is None:
+          if part.s > 0:
+            marker = 'x'
+          else:
+            marker = 'o'
         else:
-          marker = 'o'
+          marker = part.marker
+        if part.size is None:
+          #size = np.log10(part.m)
+          size = 10
+        else:
+          size = part.size
         part.rvec = rvecs[i,-1]
         part.vvec = vvecs[i,-1]
         part.avec = avecs[i,-1]
         points[i].remove()
         graphs[i].remove()
-        points[i] = plt.scatter(part.rvec[0],part.rvec[1],color=color,label=part.name,marker=marker)
+        points[i] = plt.scatter(part.rvec[0],part.rvec[1],color=color,label=part.name,marker=marker,
+          s=size)
         graphs[i] = plt.plot(rvecs[i,:,0],rvecs[i,:,1],color=color,label=part.name,alpha=0.5)[0]
         if part.name is not None:
-          legend.append([points[i],f'{part.name} (v = {np.linalg.norm(part.vvec)/1e3:<.2f} km/s d = {np.linalg.norm(part.rvec)/1.496e+11:<.2f} AU)'])
+          #legend.append([points[i],f'{part.name} (v = {np.linalg.norm(part.vvec)/1e3:<.2f} km/s d = {np.linalg.norm(part.rvec)/1.496e+11:<.2f} AU)'])
+          legend.append([points[i],f'{part.name} (v = {np.linalg.norm(part.vvec):<.2f} d = {np.linalg.norm(part.rvec):<.2f})'])
         #print(f'{part.name} ({np.linalg.norm(part.vvec):<.1f} SPEED)')
       #print([i[1] for i in legend])
       make_graphs_end = time.time()
       #plt.title(f't = {dt*cnt/86400:<.2f} days',color='white')
       plt.title(f't = {dt*cnt:<.2f}',color='white')
-      leg = ax.legend([i[0] for i in legend],[i[1] for i in legend]) #Get items from columns of legend list
-      leg.get_frame().set_alpha(0.3)
+      if set_legend:
+        leg = ax.legend([i[0] for i in legend],[i[1] for i in legend]) #Get items from columns of legend list
+        leg.get_frame().set_alpha(0.3)
       #leg.get_frame().set_facecolor((0, 0, 1, 0.1))
       if save:
         plt.savefig(fname=f'{dir}/{fname}_{save_cnt}.jpg')
