@@ -9,3 +9,4 @@ OrbitalPeriod(days)	88.0	224.7	365.2	27.3	687.0	4331	10747	30589	59800	90560
 OrbitalVelocity(km/s)	47.4	35.0	29.8	1.0	24.1	13.1	9.7	6.8	5.4	4.7
 OrbitalInclination(degrees)	7.0	3.4	0.0	5.1	1.8	1.3	2.5	0.8	1.8	17.2
 OrbitalEccentricity	0.206	0.007	0.017	0.055	0.094	0.049	0.052	0.047	0.010	0.244
+

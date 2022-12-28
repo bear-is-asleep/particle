@@ -5,16 +5,16 @@ import time
 import particle
 import os
 import plotters
-import itertools
+import helpers
 
 
 
 def sim_particle_motions(particles,boundary,memory,dt,timeit=False,display_rate=10,
-  xlim=None,ylim=None,save=False,dir='Gifs',fname='sim',save_after=100,update_rate=1,
+  xlim=None,ylim=None,save=False,dir='Gifs',fname='sim',frames=100,update_rate=1,
   closest_N=10):
   """
   Sim particle motions with option to save as gif
-  save_after: amount of pngs to make before saving, then deleting pngs
+  frames: amount of pngs to make before saving, then deleting pngs
   """
   if save:
     os.system(f'mkdir -p {dir}')
@@ -176,7 +176,7 @@ def sim_particle_motions(particles,boundary,memory,dt,timeit=False,display_rate=
       #leg.get_frame().set_facecolor((0, 0, 1, 0.1))
       if save:
         plt.savefig(fname=f'{dir}/{fname}_{save_cnt}.jpg')
-        if save_cnt > save_after:
+        if save_cnt > frames:
           plotters.make_image_gif(dir+'/',fname)
           break
         save_cnt += 1
@@ -185,6 +185,8 @@ def sim_particle_motions(particles,boundary,memory,dt,timeit=False,display_rate=
         plt.pause(1/6e5)
       tot_plot_end = time.time()
       if timeit and cnt%display_rate == 0:
+        helpers.print_stars()
+        print(f'Frames made: {cnt}')
         print(f'Sim time (s): {tot_sim_end-tot_sim_start:<.3f}')
         print(f'Plot time (s): {tot_plot_end-tot_plot_start:<.3f}')
         print(f'--Make graph time (s): {make_graphs_end-tot_plot_start:<.3f}')
