@@ -6,7 +6,8 @@ class Particle:
 
   k = 10 #EM Coupling constant - all have the same constant
 
-  def __init__(self,q=0,m=1,s=0,a0=1e-1,name=None,rvec=np.zeros(3),vvec=np.zeros(3),avec=np.zeros(3),color=None): #
+  def __init__(self,q=0,m=1,s=0,a0=1e-1,name=None,rvec=np.zeros(3),vvec=np.zeros(3),avec=np.zeros(3),color=None,
+    g=0): #
     self.rvec = rvec #location
     self.vvec = vvec #velocity
     self.avec = avec #acceleration
@@ -16,6 +17,7 @@ class Particle:
     self.s = s #s is spring constant used, 0 for no springiness
     self.a0 = a0 #minimum distance (Bound state formation)?
     self.color = color #Set color for particle point
+    self.g = g #Set downward acceleration
 
   def get_r(self,rvec): #Distance between particle and other point
     tot = 0
@@ -45,6 +47,10 @@ class Particle:
     if self.m == 0:
       return 0
     return self.k*self.q*q/(self.m*r**2) #Coloumb acceleration
+  def a_fall(self): #Downward graviation
+    if self.m == 0:
+      return 0
+    return self.g
 
 class EMParticle(Particle): #Make em particle to simulate coloumb force
   k = 10 #Coupling constant - all have the same constant
@@ -64,7 +70,10 @@ class SpringParticle(Particle): #Make spring particle to simulate spring force
 
 
 def make_particles(n,m=50,rmax=10,vmax=0,amax=0,rtype='uniform',dim=2,charge=1,
-  s=0,part_type=Particle): #Make n random particles and turn them into a list
+  s=0,g=0): 
+  """
+  Make n random particles and turn them into a list
+  """
   particles = []
   for _ in range(n):
     q = np.random.choice([-charge,charge])
@@ -88,7 +97,7 @@ def make_particles(n,m=50,rmax=10,vmax=0,amax=0,rtype='uniform',dim=2,charge=1,
     #   part = Particle(q=q,m=m,s=s,rvec=rvec,vvec=vvec,avec=avec)
     # elif isinstance(part_type,SpringParticle):
     #   part = SpringParticle(q=q,m=m,s=s,rvec=rvec,vvec=vvec,avec=avec)
-    part = Particle(q=q,m=m,s=s,rvec=rvec,vvec=vvec,avec=avec)
+    part = Particle(q=q,m=m,s=s,rvec=rvec,vvec=vvec,avec=avec,g=g)
     particles.append(part)
   return particles
 

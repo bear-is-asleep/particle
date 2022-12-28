@@ -11,7 +11,7 @@ import helpers
 
 def sim_particle_motions(particles,boundary,memory,dt,timeit=False,display_rate=10,
   xlim=None,ylim=None,save=False,dir='Gifs',fname='sim',frames=100,update_rate=1,
-  closest_N=10):
+  closest_N=1e9):
   """
   Sim particle motions with option to save as gif
   frames: amount of pngs to make before saving, then deleting pngs
@@ -122,7 +122,7 @@ def sim_particle_motions(particles,boundary,memory,dt,timeit=False,display_rate=
             a+=part.a_C(r,q) #acceleration due to em
         if calc_polynomial and s!=0:
           a+=part.a_s(r,s) #acceleration due to spring
-        avec_next += a*rhat #Get vector acceleration
+        avec_next += a*rhat-part.g*np.array([0,1,0]) #Get vector acceleration
       avecs[j,-2] = avec_next
       avec = avecs[j,-2]
       #Destroy first points to preserve memory
