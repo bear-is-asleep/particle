@@ -4,8 +4,11 @@ import pandas as pd
 
 planet_info = pd.read_csv('planets.txt', sep='\t', index_col=0)
 mass_sun = 1.9891e30 #kg
+d_sun = 1.3927e9 #m
 inds = [str(ind).strip() for ind in planet_info.loc['OrbitalInclination(degrees)'].index]
 planet_info.columns = inds
+planet_size_scale=10
+
 
 def make_moon(planet_name,moon_name,color,theta_planet=None,theta_moon=None,v_planet=None,
   v_moon=None,perihelion_planet=None,perihilion_moon=None,m=None):
@@ -24,6 +27,7 @@ def make_moon(planet_name,moon_name,color,theta_planet=None,theta_moon=None,v_pl
   if m is None:
     m = planet_info.loc['Mass(10^24kg)',moon_name]*1e24
 
+  d = planet_info.loc['Diameter(km)',moon_name]*1e3
   vy_init = v_planet*np.cos(theta_planet)+v_moon*np.cos(theta_moon)
   vz_init = v_planet*np.sin(theta_planet)+v_moon*np.sin(theta_moon)
   return particle.Particle(q=0,
@@ -33,6 +37,7 @@ def make_moon(planet_name,moon_name,color,theta_planet=None,theta_moon=None,v_pl
     vvec=np.array([0,vy_init,vz_init]),
     name=moon_name,
     color=color)
+    #size=(d/d_sun)**2*planet_size_scale)
 
 def make_planet(name,color,theta=None,v=None,perihelion=None,m=None):
   if theta is None:
@@ -44,6 +49,7 @@ def make_planet(name,color,theta=None,v=None,perihelion=None,m=None):
   if m is None:
     m = planet_info.loc['Mass(10^24kg)',name]*1e24
 
+  d = planet_info.loc['Diameter(km)',name]*1e3
   vy_init = v*np.cos(theta)
   vz_init = v*np.sin(theta)
   return particle.Particle(q=0,
@@ -53,12 +59,14 @@ def make_planet(name,color,theta=None,v=None,perihelion=None,m=None):
     vvec=np.array([0,vy_init,vz_init]),
     name=name,
     color=color)
+    #size=(d/d_sun)**2*planet_size_scale)
 
 sun = particle.Particle(q=0,
   m=mass_sun,
   s=0,
   name='Sun',
-  color='yellow')
+  color='yellow',
+  size=planet_size_scale)
 earth = make_planet('EARTH','blue')
 moon = make_moon('EARTH','MOON','grey')
 mars = make_planet('MARS','red')

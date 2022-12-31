@@ -117,8 +117,8 @@ def sim_particle_motions(particles,boundary,memory,dt,timeit=False,display_rate=
         rhat = part.get_rhat(other_part.rvec) #Direction of seperation
         m,q,s = other_part.m,other_part.q,other_part.s #mass, charge, spin
         if calc_inverse:
-          #a+= part.a_g(m,r,G=particle.GN) #acceleration due to gravity
-          a+=part.a_g(m,r)
+          a+= part.a_g(m,r,G=particle.GN) #acceleration due to gravity
+          #a+=part.a_g(m,r)
           if q != 0:
             a+=part.a_C(r,q) #acceleration due to em
         if calc_polynomial and s!=0:
@@ -163,7 +163,7 @@ def sim_particle_motions(particles,boundary,memory,dt,timeit=False,display_rate=
           marker = part.marker
         if part.size is None:
           #size = np.log10(part.m)
-          size = 10
+          size = 5
         else:
           size = part.size
         part.rvec = rvecs[i,-1]
@@ -175,13 +175,13 @@ def sim_particle_motions(particles,boundary,memory,dt,timeit=False,display_rate=
           s=size)
         graphs[i] = plt.plot(rvecs[i,:,0],rvecs[i,:,1],color=color,label=part.name,alpha=0.5)[0]
         if part.name is not None:
-          #legend.append([points[i],f'{part.name} (v = {np.linalg.norm(part.vvec)/1e3:<.2f} km/s d = {np.linalg.norm(part.rvec)/1.496e+11:<.2f} AU)'])
-          legend.append([points[i],f'{part.name} (v = {np.linalg.norm(part.vvec):<.2f} d = {np.linalg.norm(part.rvec):<.2f})'])
+          legend.append([points[i],f'{part.name} (v = {np.linalg.norm(part.vvec)/1e3:<.2f} km/s d = {np.linalg.norm(part.rvec)/1.496e+11:<.2f} AU)'])
+          #legend.append([points[i],f'{part.name} (v = {np.linalg.norm(part.vvec):<.2f} d = {np.linalg.norm(part.rvec):<.2f})'])
         #print(f'{part.name} ({np.linalg.norm(part.vvec):<.1f} SPEED)')
       #print([i[1] for i in legend])
       make_graphs_end = time.time()
-      #plt.title(f't = {dt*cnt/86400:<.2f} days',color='white')
-      plt.title(f't = {dt*cnt:<.2f}',color='white')
+      plt.title(f't = {dt*cnt/86400:<.2f} days',color='white')
+      #plt.title(f't = {dt*cnt:<.2f}',color='white')
       if set_legend:
         leg = ax.legend([i[0] for i in legend],[i[1] for i in legend]) #Get items from columns of legend list
         leg.get_frame().set_alpha(0.3)
@@ -196,7 +196,7 @@ def sim_particle_motions(particles,boundary,memory,dt,timeit=False,display_rate=
         plt.draw()
         plt.pause(1/6e5)
       tot_plot_end = time.time()
-      if timeit and cnt%display_rate == 0:
+      if timeit and cnt%display_rate == 0 and cnt != 0:
         helpers.print_stars()
         print(f'Frames made: {cnt}')
         print(f'Sim time (s): {tot_sim_end-tot_sim_start:<.3f}')
